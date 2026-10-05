@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>イントロクイズ</title>
+
+  <!-- フォント（ネット接続が無い場合は自動で端末のフォントに切り替わります） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 全体を包むコンテナ。画面(section)を切り替えて表示する -->
+  <main class="app">
+
+    <!-- ================= 1. スタート画面 ================= -->
+    <section id="screen-start" class="screen is-active">
+      <h1 class="title">イントロ<br>クイズ</h1>
+      <<!--<p class="lead">IT部 × カラオケ部 交流会</p>-->
+
+      <!-- 出題設定 -->
+      <div class="panel">
+        <h2>あそびかた設定</h2>
+
+        <!-- モード選択: 4択 / 司会者 -->
+        <fieldset class="field">
+          <legend>モード</legend>
+          <label><input type="radio" name="mode" value="choice" checked> 4択（ひとりで遊ぶ）</label>
+          <label><input type="radio" name="mode" value="host"> 司会者モード（みんなで早押し）</label>
+        </fieldset>
+
+        <!-- 出題数 -->
+        <label class="field">出題数
+          <select id="select-count"></select>
+        </label>
+
+        <p id="start-message" class="message"></p>
+        <button id="btn-start" class="btn btn-main">スタート</button>
+      </div>
+
+      <!-- 曲の追加パネル（その場で追加／songs.js 用の記述づくり） -->
+      <details class="panel">
+        <summary>曲をその場で追加する</summary>
+        <p class="note">
+          ここで追加した曲は<b>このページを閉じると消えます</b>。<br>
+          ずっと残したいときは、下の「記述をコピー」で出た文章を <code>songs.js</code> に貼り、
+          音源ファイルを <code>audio</code> フォルダに入れてください。
+        </p>
+        <label class="field">曲名 <input id="add-title" type="text" placeholder="例: 曲名"></label>
+        <label class="field">アーティスト名 <input id="add-artist" type="text" placeholder="例: アーティスト名"></label>
+        <label class="field">イントロ開始位置（秒）
+          <input id="add-start" type="number" min="0" step="0.5" value="0">
+        </label>
+        <label class="field">音源ファイル <input id="add-file" type="file" accept="audio/*"></label>
+        <div class="row">
+          <button id="btn-add" class="btn">追加する</button>
+          <button id="btn-copy" class="btn btn-sub">songs.js 用の記述をコピー</button>
+        </div>
+        <p id="add-message" class="message"></p>
+
+        <!-- 現在登録されている曲の一覧 -->
+        <h3>登録中の曲 <span id="song-count"></span></h3>
+        <ul id="song-list" class="song-list"></ul>
+      </details>
+    </section>
+
+    <!-- ================= 2. クイズ画面 ================= -->
+    <section id="screen-quiz" class="screen">
+      <header class="quiz-head">
+        <span id="quiz-progress">第1問 / 5</span>
+        <span id="quiz-score">0 pt</span>
+      </header>
+
+      <!-- イントロの長さを可視化するバー。区切りが「聞ける長さ」の段階 -->
+      <div class="stage-bar" aria-hidden="true">
+        <div id="stage-fill" class="stage-fill"></div>
+        <span class="stage-tick" style="left:10%"></span>
+        <span class="stage-tick" style="left:30%"></span>
+        <span class="stage-tick" style="left:50%"></span>
+      </div>
+      <p id="stage-label" class="stage-label"></p>
+
+      <!-- 再生ボタン -->
+      <div class="row center">
+        <button id="btn-play" class="btn btn-main">▶ イントロを聴く</button>
+        <button id="btn-longer" class="btn btn-sub">もう少し長く聴く</button>
+      </div>
+
+      <!-- 4択の選択肢（JSで生成） -->
+      <div id="choices" class="choices"></div>
+
+      <!-- 司会者モード用: 答えを見る → 正解/不正解 -->
+      <div id="host-controls" class="row center" hidden>
+        <button id="btn-reveal" class="btn">答えを見る</button>
+      </div>
+
+      <!-- 回答後の結果表示 -->
+      <div id="answer-box" class="answer-box" hidden>
+        <p id="answer-result" class="answer-result"></p>
+        <p id="answer-song" class="answer-song"></p>
+        <!-- 司会者モードのときだけ表示する採点ボタン -->
+        <div id="host-judge" class="row center" hidden>
+          <button id="btn-correct" class="btn btn-ok">正解！</button>
+          <button id="btn-wrong" class="btn btn-ng">不正解</button>
+        </div>
+        <button id="btn-next" class="btn btn-main">次の問題へ</button>
+      </div>
+    </section>
+
+    <!-- ================= 3. 結果画面 ================= -->
+    <section id="screen-result" class="screen">
+      <h2 class="result-title">結果発表</h2>
+      <p id="result-score" class="result-score"></p>
+      <p id="result-comment" class="lead"></p>
+      <ul id="result-list" class="song-list"></ul>
+      <button id="btn-retry" class="btn btn-main">もう一度あそぶ</button>
+    </section>
+
+  </main>
+
+  <!-- 音を鳴らす要素（画面には表示されない）。JSから操作する -->
+  <audio id="player" preload="auto"></audio>
+
+  <!-- 読み込み順が大事: ①曲データ → ②プログラム -->
+  <script src="songs.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

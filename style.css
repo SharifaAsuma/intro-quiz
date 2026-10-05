@@ -1,0 +1,234 @@
+/* =====================================================================
+ * style.css  ―  見た目の定義
+ * 構成:
+ *   1. 色・フォントの変数      (ここを変えると全体の雰囲気が変わる)
+ *   2. 全体・共通パーツ
+ *   3. 各画面ごとのスタイル     (スタート / クイズ / 結果)
+ * ===================================================================== */
+
+/* ---------- 1. 色・フォントの変数 ---------- */
+:root {
+  --bg:      #16112b;   /* 背景（深い紫） */
+  --panel:   #231b40;   /* パネルの背景 */
+  --line:    #3b3066;   /* 枠線 */
+  --text:    #f4f0ff;   /* 文字色 */
+  --muted:   #a89fcb;   /* 補助的な文字色 */
+  --pink:    #ff4f9a;   /* メインのアクセント色 */
+  --cyan:    #3de0d0;   /* 正解の色 */
+  --amber:   #ffc857;   /* 不正解・注意の色 */
+
+  --font-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-body:    "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+/* ---------- 2. 全体・共通パーツ ---------- */
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* アプリ本体: 中央寄せ・スマホでも読みやすい幅 */
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 18px 48px;
+}
+
+/* 画面の切り替え: is-active が付いた画面だけ表示 */
+.screen { display: none; }
+.screen.is-active { display: block; }
+
+[hidden] { display: none !important; }
+
+h1, h2, h3 { margin: 0; }
+
+.lead { color: var(--muted); margin: 0 0 20px; }
+.note { color: var(--muted); font-size: 0.85rem; }
+.message { min-height: 1.5em; margin: 8px 0; font-size: 0.9rem; color: var(--amber); }
+
+code {
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* パネル（設定やリストを囲む箱） */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.panel h2 { font-size: 1.05rem; margin-bottom: 12px; }
+.panel h3 { font-size: 0.95rem; margin: 18px 0 8px; }
+.panel summary { cursor: pointer; font-weight: 700; }
+
+/* 入力フォーム部品 */
+.field {
+  display: block;
+  border: 0;
+  padding: 0;
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+}
+.field legend { padding: 0; margin-bottom: 4px; }
+fieldset.field label { display: block; padding: 4px 0; }
+
+input[type="text"], input[type="number"], select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+}
+input[type="file"] { display: block; margin-top: 4px; max-width: 100%; }
+
+/* ボタン */
+.btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.08s, background 0.15s;
+}
+.btn:hover { background: var(--line); }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-main { background: var(--pink); border-color: var(--pink); color: #fff; }
+.btn-main:hover { background: #ff6aab; }
+.btn-sub  { background: transparent; }
+.btn-ok   { background: var(--cyan);  border-color: var(--cyan);  color: #0b2b28; }
+.btn-ng   { background: var(--amber); border-color: var(--amber); color: #3a2a00; }
+.btn-ok:hover, .btn-ng:hover { filter: brightness(1.1); }
+
+/* キーボード操作時のフォーカス表示 */
+:is(.btn, input, select, summary, .choice):focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
+.row.center { justify-content: center; }
+
+/* 曲リスト（登録一覧・結果一覧で共通） */
+.song-list { list-style: none; padding: 0; margin: 0; }
+.song-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.song-list .sub { color: var(--muted); font-size: 0.8rem; }
+.song-list .mark-ok { color: var(--cyan); font-weight: 700; }
+.song-list .mark-ng { color: var(--amber); font-weight: 700; }
+.song-list button {
+  background: none; border: 0; color: var(--muted);
+  cursor: pointer; font: inherit; text-decoration: underline;
+}
+
+/* ---------- 3-a. スタート画面 ---------- */
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 17vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  margin: 24px 0 12px;
+  /* ネオンサイン風の二重の影 */
+  text-shadow: 3px 3px 0 var(--pink), 6px 6px 0 rgba(255, 79, 154, 0.35);
+}
+
+/* ---------- 3-b. クイズ画面 ---------- */
+.quiz-head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+#quiz-score { color: var(--cyan); }
+
+/* イントロの長さバー: 再生中に伸びていく */
+.stage-bar {
+  position: relative;
+  height: 44px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.stage-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--pink);
+}
+/* 区切り線（長さの段階を示す） */
+.stage-tick {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--bg);
+}
+.stage-label { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 8px 0 18px; }
+
+/* 4択ボタン */
+.choices { display: grid; gap: 10px; margin-top: 18px; }
+.choice {
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--panel);
+  color: var(--text);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.choice:hover:not(:disabled) { border-color: var(--pink); }
+.choice .artist { display: block; color: var(--muted); font-size: 0.8rem; }
+.choice.is-correct { border-color: var(--cyan);  background: rgba(61, 224, 208, 0.15); }
+.choice.is-wrong   { border-color: var(--amber); background: rgba(255, 200, 87, 0.12); }
+.choice:disabled { cursor: default; }
+
+/* 回答後の表示 */
+.answer-box { margin-top: 22px; text-align: center; }
+.answer-result { font-family: var(--font-display); font-size: 1.8rem; margin: 0; }
+.answer-result.ok { color: var(--cyan); }
+.answer-result.ng { color: var(--amber); }
+.answer-song { font-size: 1.1rem; margin: 6px 0 16px; }
+
+/* ---------- 3-c. 結果画面 ---------- */
+.result-title { font-family: var(--font-display); font-size: 2rem; }
+.result-score {
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  color: var(--pink);
+  margin: 8px 0 0;
+}
+#screen-result .btn-main { margin-top: 20px; }
+
+/* 動きを減らす設定の人には、アニメーションを切る */
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
