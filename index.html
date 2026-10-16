@@ -28,6 +28,16 @@
 
         <!-- モード選択: 4択 / 司会者 -->
         <fieldset class="field">
+        <!-- 参加者の登録（司会者モードのときだけ表示される） -->
+        <div id="player-area" class="field" hidden>
+         <label for="player-name">参加者（最大8人）</label>
+         <div class="row">
+          <input id="player-name" type="text" placeholder="名前を入力" maxlength="12">
+          <button id="btn-add-player" class="btn">追加</button>
+         </div>
+         <ul id="player-list" class="song-list"></ul>
+        </div>
+        
           <legend>モード</legend>
           <label><input type="radio" name="mode" value="choice" checked> 4択（ひとりで遊ぶ）</label>
           <label><input type="radio" name="mode" value="host"> 司会者モード（みんなで早押し）</label>
@@ -74,6 +84,9 @@
         <span id="quiz-progress">第1問 / 5</span>
         <span id="quiz-score">0 pt</span>
       </header>
+      
+      <!-- 参加者ごとの得点表（司会者モードのときだけ表示。JSが描き直す） -->
+      <ul id="scoreboard" class="scoreboard" hidden></ul>
 
       <!-- イントロの長さを可視化するバー。区切りが「聞ける長さ」の段階 -->
       <div class="stage-bar" aria-hidden="true">
@@ -102,11 +115,14 @@
       <div id="answer-box" class="answer-box" hidden>
         <p id="answer-result" class="answer-result"></p>
         <p id="answer-song" class="answer-song"></p>
-        <!-- 司会者モードのときだけ表示する採点ボタン -->
-        <div id="host-judge" class="row center" hidden>
-          <button id="btn-correct" class="btn btn-ok">正解！</button>
-          <button id="btn-wrong" class="btn btn-ng">不正解</button>
+        
+        <!-- 司会者が「正解した人」を選ぶ場所 -->
+        <div id="host-judge" hidden>
+         <p class="judge-label">正解したのは？</p>
+         <div id="judge-buttons" class="judge-buttons"></div>
+         <button id="btn-nobody" class="btn btn-ng">正解者なし</button>
         </div>
+        
         <button id="btn-next" class="btn btn-main">次の問題へ</button>
       </div>
     </section>
@@ -116,6 +132,7 @@
       <h2 class="result-title">結果発表</h2>
       <p id="result-score" class="result-score"></p>
       <p id="result-comment" class="lead"></p>
+      <ul id="ranking" class="song-list ranking" hidden></ul>
       <ul id="result-list" class="song-list"></ul>
       <button id="btn-retry" class="btn btn-main">もう一度あそぶ</button>
     </section>
