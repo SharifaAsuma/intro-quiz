@@ -553,7 +553,7 @@ function showResult() {
 			rankList.append(li);
 		});
 	} else {
-		// 4択モード: 今まで通り、合計点とコメント
+		// 4択モード: 合計点とコメント
 		const max = state.questions.length * STAGE_POINTS[0];
 		const ratio = max > 0 ? state.score / max : 0;
 		$("result-score").textContent = `${state.score} / ${max} pt`;
